@@ -1,0 +1,68 @@
+<html lang="en">
+<head>
+    <title>Tax Rate</title>
+</head>
+<body>
+<form action="#">
+    <label>Enter Value: <input type="number" id="inputVal" value="100000"></label>
+    <button type="submit" onclick="doFunction()">Submit</button>
+</form>
+<pre class="val"></pre>
+<p class="info"></p>
+</body>
+<script>
+
+    // check for latest data here - https://www.nerdwallet.com/article/taxes/federal-income-tax-brackets
+    // ask bard for - Give me json data for tax brackets for 2024
+    // Time - O(n) - where n is the total number of individual elements in the array and its subarrays
+    // Space - O(d) - where d is the maximum depth of the subarrays in given array
+    const STANDARD_DEDUCTIBLE_2022 = 25900;
+    const BRACKETS_2023 = [{"income_range": [0, 22000], "tax_rate": 0.1}, {"income_range": [22001, 89050], "tax_rate": 0.12}, {"income_range": [89051, 181500], "tax_rate": 0.22}, {"income_range": [181501, 364150], "tax_rate": 0.24}, {"income_range": [364151, 523600], "tax_rate": 0.32}, {"income_range": [523601, 693750], "tax_rate": 0.35}, {"income_range": [693751,700000], "tax_rate": 0.37}]
+    const STANDARD_DEDUCTIBLE_2023 = 29200;
+   let BRACKETS_2022 =  [
+            {"income_range": [0, 23200], "tax_rate": 0.1},
+            {"income_range": [23201, 94300], "tax_rate": 0.12},
+            {"income_range": [94301, 201100], "tax_rate": 0.22},
+            {"income_range": [201101, 383850], "tax_rate": 0.24},
+            {"income_range": [383851, 536900], "tax_rate": 0.32},
+            {"income_range": [536901, 609350], "tax_rate": 0.35},
+            {"income_range": [609351, 700000], "tax_rate": 0.37}
+        ];
+
+    let [BRACKETS, STANDARD_DEDUCTIBLE] = [BRACKETS_2022, STANDARD_DEDUCTIBLE_2022];
+    // let [BRACKETS, STANDARD_DEDUCTIBLE] = [BRACKETS_2023, STANDARD_DEDUCTIBLE_2023];
+
+    function taxRate(amount) {
+        let remAmount = amount;
+        remAmount = remAmount - STANDARD_DEDUCTIBLE_2023; //Deductible
+        const origRemAmount = remAmount;
+        console.log('Removing deductible first. Remaining - '+ origRemAmount);
+
+
+        let rates = BRACKETS_2023.map(v => ({val: v.income_range[1] - v.income_range[0], percentage: v.tax_rate}))
+
+        let tax=0;
+        for (const rateKey of rates) {
+            if(remAmount>rateKey.val){
+                tax += rateKey.val*(rateKey.percentage);
+                remAmount -= rateKey.val;
+                console.log(`${rateKey.val*(rateKey.percentage)} amount for ${rateKey.val} at rate ${rateKey.percentage*100}`);
+            } else {
+                tax += (remAmount)*(rateKey.percentage);
+                console.log(`${remAmount*(rateKey.percentage)} amount for ${remAmount} at rate ${rateKey.percentage*100} final`);
+                break;
+            }
+        }
+        return `Tax = ${tax}\nEffective Tax Rate for ${amount} = ${tax*100/amount}\nEffective tax for ${origRemAmount} = ${tax*100/origRemAmount}\nTake home = ${amount-tax}`
+
+    }
+
+    function doFunction(){
+        document.querySelector(".val").textContent =
+            taxRate(
+                +document.getElementById("inputVal").value
+            );
+    }
+    document.querySelector(".info").textContent = JSON.stringify(BRACKETS);
+</script>
+</html>
